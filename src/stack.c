@@ -1,40 +1,66 @@
+
 #include "cforge/stack.h"
 
-void init(Stack *stack)
+#include <stdlib.h>
+#include <string.h>
+
+void init(Stack *stack, size_t element_size)
 {
-    stack->top = -1;
+    stack->data = malloc(SIZE * element_size);
+    stack->top = 0;
+    stack->element_size = element_size;
 }
 
 bool isFull(Stack *stack)
 {
-    return stack->top == SIZE - 1;
+    return stack->top == SIZE;
 }
 
 bool isEmpty(Stack *stack)
 {
-    return stack->top == -1;
+    return stack->top == 0;
 }
 
-void push(Stack *stack, int item)
+void push(Stack *stack, const void *item)
 {
-    if (isFull(stack))
+    if (isFull(stack) || item == NULL)
         return;
 
-    stack->data[++stack->top] = item;
+    memcpy(
+        (char *)stack->data + stack->top * stack->element_size,
+        item,
+        stack->element_size
+    );
+
+    stack->top++;
 }
 
-int pop(Stack *stack)
+bool pop(Stack *stack, void *out)
 {
-    if (isEmpty(stack))
-        return -1;
+    if (isEmpty(stack) || out == NULL)
+        return false;
 
-    return stack->data[stack->top--];
+    stack->top--;
+
+    memcpy(
+        out,
+        (char *)stack->data + stack->top * stack->element_size,
+        stack->element_size
+    );
+
+    return true;
 }
 
-int peek(Stack *stack)
+bool peek(Stack *stack, void *out)
 {
-    if (isEmpty(stack))
-        return -1;
+    if (isEmpty(stack) || out == NULL)
+        return false;
 
-    return stack->data[stack->top];
+    memcpy(
+        out,
+        (char *)stack->data + (stack->top - 1) * stack->element_size,
+        stack->element_size
+    );
+
+    return true;
 }
